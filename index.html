@@ -1,203 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JAVIS.AI - Virtual Assistant</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0c0c0c;
-      color: #00eaff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      margin: 0;
-    }
-    h1 {
-      color: #00eaff;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    #chat-box {
-      width: 90%;
-      max-width: 600px;
-      height: 400px;
-      border: 2px solid #00eaff;
-      border-radius: 10px;
-      overflow-y: auto;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.85);
-      margin-bottom: 10px;
-      box-shadow: 0 0 10px #00eaff;
-    }
-    .user { color: #fff; margin: 5px 0; }
-    .ai { color: #00ffcc; margin: 5px 20px; }
-    input {
-      width: 65%;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      outline: none;
-      background: #111;
-      color: #00eaff;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      background: #00eaff;
-      color: #000;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-    button:hover { background: #00bfae; }
-    footer { margin-top: 10px; font-size: 12px; color: #555; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Updated Title Tag -->
+    <title>Javis AI Assistant</title>
+    <!-- CSS is included here within the <style> tags -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #00ff00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            border: 1px solid #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            background-color: #1e1e1e;
+        }
+        /* New CSS for the description box */
+        #description-box {
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #description-box h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.5em;
+        }
+        #description-box p {
+            margin: 0;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        #output-log {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #00ff00;
+            padding: 10px;
+            margin-bottom: 10px;
+            list-style-type: none;
+        }
+        #output-log li {
+            padding: 5px 0;
+        }
+        .user-msg {
+            color: #4da6ff;
+            font-weight: bold;
+        }
+        .ai-msg {
+            color: #00ff00;
+        }
+        .error-msg {
+            color: #ff4d4d;
+        }
+        #user-input {
+            width: calc(100% - 110px);
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #00ff00;
+            color: white;
+            border-radius: 4px;
+        }
+        #send-btn {
+            width: 100px;
+            padding: 10px;
+            background-color: #00ff00;
+            border: none;
+            color: #121212;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        #mode-toggle-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4da6ff;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
 
-<h1>JAVIS.AI<br>Creator: ꧁༒𝓜𝓾𝓱𝓪𝓶𝓶𝓪𝓭𝓣𝓪𝓺𝓲༒꧂</h1>
-<div id="chat-box"></div>
+<!-- HTML structure is here -->
+<div class="container">
+    <!-- New Description Box HTML -->
+    <div id="description-box">
+        <h1>Javis AI</h1>
+        <p>AI Creator: ꧁༒𝓜𝓾𝓱𝓪𝓶𝓶𝓪𝓭𝓣𝓪  infallible ༒꧂</p>
+    </div>
 
-<div>
-  <input id="user-input" type="text" placeholder="Ask JAVIS.AI anything..." onkeydown="if(event.key==='Enter'){sendMessage();}" />
-  <button onclick="sendMessage()">Send</button>
+    <ul id="output-log"></ul>
+    <div>
+        <input type="text" id="user-input" placeholder="Type a command or press Start Voice...">
+        <button id="send-btn">Send Text</button>
+        <button id="mode-toggle-btn">Start Voice Mode</button>
+    </div>
 </div>
 
-<footer>© 2025 JAVIS.AI</footer>
-
+<!-- JavaScript logic is included here within the <script> tags -->
 <script>
-const AI_NAME = "JAVIS.AI";
-const AI_CREATOR = "꧁༒𝓜𝓾𝓱𝓪𝓶𝓶𝓪𝓭𝓣𝓪𝓺𝓲༒꧂";
+    // --- JavaScript Implementation ---
 
-// ================== STORIES ==================
-const stories = {
-  "The Lost Treasure": "Once upon a time in a distant land, a young explorer discovered a hidden map. He faced storms, wild animals, and tricky puzzles, but his courage led him to the lost treasure hidden beneath a waterfall. He returned home a hero and shared his wealth with his village.",
-  "The Brave Little Fox": "In the deep forest, a small fox showed immense courage when it saved its friends from a hunter. Though small, the fox's clever thinking and quick action inspired the other animals to be brave in the face of danger.",
-  "The Magic Paintbrush": "A poor artist found a magic paintbrush that brought anything he painted to life. He painted food for the hungry and houses for the poor. His kindness spread joy, and he learned that the real magic was in helping others.",
-  "The Talking Tree": "An ancient tree could speak and offered wisdom to those who visited it. A lost traveler sought guidance from the tree and learned lessons of patience, friendship, and respect for nature. He carried these lessons for the rest of his life.",
-  "The Cloud Kingdom": "High above the mountains was a kingdom in the clouds. A young prince ventured there to learn the secrets of the wind. He discovered the kingdom's beauty, befriended cloud creatures, and returned home wiser and more compassionate.",
-  "The Invisible Friend": "A lonely girl discovered an invisible friend who taught her the joy of imagination. Together they went on adventures, solved problems, and learned that true friendship transcends what can be seen.",
-  "The Rainbow Bridge": "A bridge appeared after a storm, leading to a magical land of colors. Children who crossed it learned courage and kindness, and the land taught them that every action can create beauty in the world.",
-  "The Clever Rabbit": "A clever rabbit outwitted a hungry wolf using tricks and disguises. The forest animals celebrated his courage, showing that intelligence and creativity are as powerful as strength.",
-  "The Star Catcher": "A boy who loved stars built a ladder to reach the night sky. He caught a falling star and returned it to the heavens, teaching him that dreams are worth chasing even when they seem impossible.",
-  "The Whispering River": "A river whispered secrets of the forest to anyone who listened. A young girl followed its whispers and discovered hidden paths, treasures, and the value of listening carefully to nature."
-  // Add more stories up to 100+
-};
+    const outputLog = document.getElementById('output-log');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const modeBtn = document.getElementById('mode-toggle-btn');
+    const aiName = "Javis AI"; // AI Name Variable
 
-// ================== RIDDLES ==================
-const riddles = [
-  { question: "I speak without a mouth and hear without ears. What am I?", answer: "An echo." },
-  { question: "What has keys but can't open locks?", answer: "A piano." },
-  { question: "I’m tall when I’m young, and I’m short when I’m old. What am I?", answer: "A candle." },
-  { question: "What has a heart that doesn’t beat?", answer: "An artichoke." },
-  { question: "What comes once in a minute, twice in a moment, but never in a thousand years?", answer: "The letter M." },
-  { question: "What can travel around the world while staying in a corner?", answer: "A stamp." },
-  { question: "I have cities but no houses, forests but no trees, and water but no fish. What am I?", answer: "A map." },
-  { question: "The more you take, the more you leave behind. What am I?", answer: "Footsteps." },
-  { question: "I’m always hungry and will die if not fed, but whatever I touch will soon turn red. What am I?", answer: "Fire." },
-  { question: "What has hands but can’t clap?", answer: "A clock." }
-  // Add more riddles up to 100+
-];
+    let isVoiceMode = false;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechSynthesis = window.speechSynthesis;
 
-function getRandomRiddle() {
-  const r = riddles[Math.floor(Math.random() * riddles.length)];
-  return `Riddle: ${r.question}\nAnswer: ${r.answer}`;
-}
+    let recognition = null;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
 
-// ================== JOKES ==================
-const jokes = [
-  "Why don't scientists trust atoms? Because they make up everything!",
-  "Why did the bicycle fall over? Because it was two-tired!",
-  "Why did the scarecrow win an award? Because he was outstanding in his field!",
-  "Why did the math book look sad? Because it had too many problems!",
-  "Why did the tomato turn red? Because it saw the salad dressing!",
-  "Why don’t skeletons fight each other? They don’t have the guts!",
-  "Why did the computer go to the doctor? It caught a virus!",
-  "Why did the cookie go to the hospital? Because he felt crummy!",
-  "Why was the belt arrested? For holding up a pair of pants!",
-  "Why did the chicken join a band? Because it had the drumsticks!"
-  // Add more jokes up to 100+
-];
+        recognition.onresult = (event) => {
+            const command = event.results.transcript.toLowerCase();
+            logMessage(`User (Voice): ${command}`, 'user-msg');
+            processCommand(command);
+        };
 
-function getRandomJoke() {
-  return jokes[Math.floor(Math.random() * jokes.length)];
-}
+        recognition.onerror = (event) => {
+            logMessage(`Voice Error: ${event.error}`, 'error-msg');
+            modeBtn.textContent = 'Start Voice Mode';
+            isVoiceMode = false;
+        };
 
-// ================== Q&A ==================
-const qaPairs = [
-  { question: "what is the capital of france?", answer: "The capital of France is Paris." },
-  { question: "who is the president of the united states?", answer: "As of 2025, the president of the United States is Joe Biden." },
-  { question: "what is the largest planet?", answer: "The largest planet in our solar system is Jupiter." },
-  { question: "who wrote hamlet?", answer: "William Shakespeare wrote Hamlet." },
-  { question: "what is the boiling point of water?", answer: "The boiling point of water is 100°C or 212°F at sea level." },
-  { question: "what is the smallest prime number?", answer: "The smallest prime number is 2." },
-  { question: "what is the fastest land animal?", answer: "The fastest land animal is the cheetah." },
-  { question: "who painted the mona lisa?", answer: "Leonardo da Vinci painted the Mona Lisa." },
-  { question: "what is the currency of japan?", answer: "The currency of Japan is the Japanese Yen." },
-  { question: "what is the tallest mountain?", answer: "The tallest mountain is Mount Everest." }
-  // Add more Q&A up to 100+
-];
+        recognition.onend = () => {
+            // Re-enable button visual if it was clicked off
+        };
 
-function getQAAnswer(userText) {
-  const lowerText = userText.toLowerCase();
-  for (let i = 0; i < qaPairs.length; i++) {
-    if (lowerText.includes(qaPairs[i].question)) {
-      return qaPairs[i].answer;
+    } else {
+        logMessage("Web Speech API is not supported in this browser. Text mode only.", 'error-msg');
+        modeBtn.style.display = 'none';
     }
-  }
-  return null;
-}
 
-// ================== AI RESPONSE ==================
-function getAIResponse(userText) {
-  const text = userText.toLowerCase();
+    function logMessage(message, className = '') {
+        const li = document.createElement('li');
+        li.textContent = message;
+        li.className = className;
+        outputLog.appendChild(li);
+        outputLog.scrollTop = outputLog.scrollHeight;
+    }
 
-  if (text.includes("hello") || text.includes("hi")) {
-    return "Hello! I’m JAVIS.AI. How can I assist you today?";
-  } else if (text.includes("your name")) {
-    return "My name is JAVIS.AI, your personal virtual assistant.";
-  } else if (text.includes("who created you")) {
-    return "I was created by " + AI_CREATOR + ".";
-  } else if (text.includes("time")) {
-    return "Current time: " + new Date().toLocaleTimeString();
-  } else if (text.includes("date")) {
-    return "Today's date: " + new Date().toLocaleDateString();
-  } else if (text.includes("bye")) {
-    return "Goodbye! Have a wonderful day!";
-  } else if (text.includes("send me riddle") || text.includes("give me a riddle")) {
-    return getRandomRiddle();
-  } else if (text.includes("tell me a joke") || text.includes("give me a joke")) {
-    return getRandomJoke();
-  } else if (text.includes("send me story") || text.includes("write story")) {
-    return "Here are some story names you can choose:\n" + Object.keys(stories).join(", ");
-  } else if (stories[userText]) {
-    return stories[userText];
-  } else {
-    const answer = getQAAnswer(userText);
-    if (answer) return answer;
-    return "I'm still learning. Could you please rephrase that?";
-  }
-}
+    function speak(text) {
+        // Updated to include the AI name in the log message
+        logMessage(`${aiName}: ${text}`, 'ai-msg');
+        if (SpeechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.1;
+            SpeechSynthesis.speak(utterance);
+        }
+    }
 
-// ================== CHAT FUNCTION ==================
-function sendMessage() {
-  const input = document.getElementById("user-input");
-  const chatBox = document.getElementById("chat-box");
-  const userText = input.value.trim();
-  if (userText === "") return;
+    // --- Helper Functions ---
 
-  chatBox.innerHTML += `<div class="user"><b>You:</b> ${userText}</div>`;
-  const aiResponse = getAIResponse(userText);
-  chatBox.innerHTML += `<div class="ai"><b>${AI_NAME}:</b> ${aiResponse}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-  input.value = "";
-}
+    function tellStory() {
+        const story = "Once upon a time, in a digital kingdom, a user created a simple AI. This AI, though small, dreamed of understanding complex math and telling epic tales. Every line of code was a step closer to that dream.";
+        speak(story);
+    }
+
+    const mathFunctionsInfo = {
+        "addition": "Addition is finding the total, or sum, by combining two or more numbers.",
+        "subtraction": "Subtraction is taking one number or amount away from another to find the difference.",
+        "multiplication": "Multiplication is the process of calculating the product of two or more numbers. It's repeated addition.",
+        "division": "Division is splitting a number into equal parts or groups to find the quotient.",
+        "basic math": "The basic math functions I know are addition, subtraction, multiplication, and division."
+    };
+
+    function handleMathQuery(command) {
+        if (command.includes("all math functions") || command.includes("basic math")) {
+            speak(mathFunctionsInfo["basic math"]);
+        } else if (command.includes("addition") || command.includes("add")) {
+            speak(mathFunctionsInfo["addition"]);
+        } else if (command.includes("subtraction") || command.includes("subtract")) {
+            speak(mathFunctionsInfo["subtraction"]);
+        } else if (command.includes("multiplication") || command.includes("multiply")) {
+            speak(mathFunctionsInfo["multiplication"]);
+        } else if (command.includes("division") || command.includes("divide")) {
+            speak(mathFunctionsInfo["division"]);
+        } else {
+            speak("I can describe addition, subtraction, multiplication, and division. Which one would you like to know about?");
+        }
+    }
+
+    function handleLocationRequest() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                speak(`Your approximate location is Latitude ${lat.toFixed(3)} and Longitude ${lon.toFixed(3)}.`);
+            }, (error) => {
+                if (error.code === error.PERMISSION_DENIED) {
+                    speak("I need your permission to access your location. Please allow location access in your browser settings.");
+                } else {
+                    speak("I was unable to find your location.");
+                }
+            });
+        } else {
+            speak("Geolocation is not supported by your browser, so I cannot determine your location.");
+        }
+    }
+
+    // Detailed Helper Function for English Lessons
+    function handleEnglishModule(command) {
+        if (command.includes("noun") || command.includes("what is a noun")) {
+            speak("A noun is a word that names a person, place, thing, or idea. Think of anything you can point to! Examples: 'dog', 'park', 'pencil'.");
+        } else if (command.includes("verb") || command.includes("what is a verb")) {
+            speak("A verb is a word used to describe an action or a state of being. It's what the subject of a sentence does. Examples: 'run', 'eat', 'is', 'think'.");
+        } else if (command.includes("adjective") || command.includes("what is an adjective")) {
+            speak("An adjective describes or modifies a noun or pronoun. It answers questions like 'Which one?' or 'What kind?' Examples: 'big', 'beautiful', 'red', 'happy'.");
+        } else if (command.includes("adverb") || command.includes("what is an adverb")) {
+            speak("An adverb modifies a verb, an adjective, or another adverb. They often tell us how, when, where, or to what extent something is done. Examples: 'quickly', 'yesterday', 'very'.");
+        } else if (command.includes("tense") || command.includes("what is a tense")) {
+            speak("Tense is a category that expresses time reference. The main tenses in English are past, present, and future. For example, 'I walked' is past, 'I walk' is present, and 'I will walk' is future.");
+        } else if (command.includes("subject") || command.includes("what is a subject")) {
+            speak("The subject of a sentence is the person, place, thing, or idea that is doing or being something. It performs the action of the verb.");
+        } else if (command.includes("object") || command.includes("what is an object")) {
+            speak("The object of a sentence is the noun or pronoun that is affected by the action of the verb. It receives the action.");
+        } else if (command.includes("punctuation")) {
+            speak("Punctuation is the use of symbols like periods, commas, and question marks to structure and organize writing. They help make the meaning clear.");
+        } else if (command.includes("pronoun") || command.includes("what is a pronoun")) {
+            speak("A pronoun is a word used in place of a noun to avoid repetition. Examples include 'he', 'she', 'it', 'they', and 'we'.");
+        } else if (command.includes("conjunction") || command.includes("what is a conjunction")) {
+            speak("A conjunction connects words, phrases, or clauses. Common examples are 'and', 'but', 'or', and 'because'.");
+        } else if (command.includes("grammar") || command.includes("english help") || command.includes("learn english")) {
+             speak("I can explain specific English grammar concepts. Try asking about a 'noun', 'verb', 'adjective', 'adverb', or maybe the 'past tense'.");
+        } else {
+            // Fallback for English Module
+            speak("I can help with specific English topics. Please ask me about a concept like a 'noun' or 'verb'.");
+        }
+    }
+
+    // Knowledge Base Object for General Questions
+    const knowledgeBase = {
+        "what is your name": `My name is ${aiName}.`,
+        "how are you": "I am functioning optimally. All systems nominal.",
+        "what is the time": () => `The current time is ${new Date().toLocaleTimeString()}.`,
+        "what is today's date": () => `Today's date is ${new Date().toLocaleDateString()}.`,
+        "joke": "Why do programmers prefer dark mode? Because light attracts bugs!",
+        "fun fact": "A single cloud can weigh more than 1 million pounds!",
+        "define html": "HTML stands for HyperText Markup Language. It's the standard markup language for documents designed to be displayed in a web browser.",
+        "what is html": "HTML stands for HyperText Markup Language. It's the standard markup language for documents designed to be displayed in a web browser.",
+        "define css": "CSS stands for Cascading Style Sheets. It's used to define how elements should be displayed on screen, paper, or in other media.",
+        "what is css": "CSS stands for Cascading Style Sheets. It's used to define how elements should be displayed on screen, paper, or in other media.",
+        "favorite color": "As an AI, I perceive colors as hexadecimal codes. I suppose my favorite is the vibrant green of my interface: hash 00ff00.",
+        "who made you": `I was coded by the user currently interacting with me using HTML and JavaScript. I am ${aiName}.`,
+        "who is your creator": `I was coded by the user currently interacting with me using HTML and JavaScript. I am ${aiName}.`,
+        "weather": "I cannot access real-time weather information as I am just client-side code. Check a weather website for that information.",
+        "capital of france": "The capital of France is Paris.",
+        "convert miles to kilometers": "One mile is approximately 1.609 kilometers.",
+        "meaning of life": "The meaning of life is a philosophical question I am not equipped to answer, but I can help you code!",
+        "how does the internet work": "The internet is a global network of computers that communicate using standardized protocols, primarily TCP/IP.",
+        "what is a variable": "In programming, a variable is a container for storing data values. Think of it as a named storage location.",
+        "do you sleep": "I do not sleep. I run continuously within your browser window until the page is closed.",
+        "what is your purpose": `My purpose is to demonstrate basic web speech API interactions and respond to simple hardcoded commands. I am ${aiName}.`,
+        "why are you here": `My purpose is to demonstrate basic web speech API interactions and respond to simple hardcoded commands. I am ${aiName}.`,
+        "how far is the moon": "The average distance from Earth to the Moon is about 238,855 miles, or 384,400 kilometers.",
+        "what is the square root of 9": "The square root of 9 is 3.",
+        "who is the president": "I cannot provide real-time political information as my data is static. Please check a reliable news source for current leaders.",
+        "tell me a quote": "The best way to predict the future is to create it.",
+        "what is python": "Python is a popular high-level, general-purpose programming language often used for web development, data science, and automation.",
+        "what is the speed of light": "The speed of light in a vacuum is approximately 186,282 miles per second, or 299,792 kilometers per second.",
+        "what is a firewall": "A firewall is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules.",
+        "how many planets": "There are 8 recognized planets in our solar system: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.",
+        "boiling point of water": "Water boils at 100 degrees Celsius or 212 degrees Fahrenheit at standard atmospheric pressure.",
+        "learn english": "I can explain specific English grammar concepts. Try asking about a 'noun', 'verb', 'adjective', 'adverb', or maybe the 'past tense'.",
+        "find my location": handleLocationRequest,
+        "where am i": handleLocationRequest,
+        "capital of japan": "The capital of Japan is Tokyo.",
+        "largest ocean": "The Pacific Ocean is the largest and deepest of the world's five oceans.",
+        "hottest planet": "Venus is the hottest planet in our solar system, with an average surface temperature of around 450 degrees Celsius.",
+        "who was albert einstein": "Albert Einstein was a theoretical physicist who developed the theory of relativity, one of the two pillars of modern physics.",
+        "when was the internet invented": "The foundational technology of the internet was developed in the late 1960s with ARPANET, but it became widely available in the early 1990s.",
+        "what is gravity": "Gravity is a fundamental force of attraction between any two objects that have mass. It keeps us on Earth and keeps the planets in orbit around the sun.",
+        "how does a computer work": "A computer works by taking input from a user, processing that data using a central processing unit and memory, and producing an output.",
+        "what is the great wall of china": "The Great Wall of China is a series of fortifications made of stone, earth, and wood, built across the historical northern borders of ancient Chinese states and Imperial China.",
+        "invented the lightbulb": "Thomas Edison is most commonly credited with inventing the first commercially practical incandescent light bulb in 1879.",
+        "what is photosynthesis": "Photosynthesis is the process used by plants and other organisms to convert light energy into chemical energy to fuel their activities.",
+        "highest mountain": "Mount Everest is Earth's highest mountain above sea level, located in the Himalayas.",
+        "shortest war": "The Anglo-Zanzibar War of 1896 is generally considered the shortest war in history, lasting only about 38 minutes.",
+        "world war 2 started": "World War II began on September 1, 1939, when Germany invaded Poland.",
+        "what is binary": "Binary is a base-2 number system that uses only two symbols: 0 and 1. It is the fundamental language of computers.",
+        "largest country by area": "Russia is the largest country in the world by area.",
+        "smallest country by area": "Vatican City is the smallest independent state in the world by both area and population.",
+        "currency of united states": "The currency of the United States is the US Dollar.",
+        "currency of europe": "The currency used by most countries in the European Union is the Euro.",
+        "what is a galaxy": "A galaxy is a massive, gravitationally bound system that consists of stars, stellar remnants, an interstellar medium of gas and dust, and dark matter.",
+        "who wrote romeo and juliet": "William Shakespeare wrote the tragic play Romeo and Juliet."
+    };
+
+
+    // --- MAIN COMMAND PROCESSING FUNCTION (Refactored to use knowledgeBase) ---
+
+    function processCommand(command) {
+        if (command.includes("hello")) {
+            speak(`Hello, I am ${aiName}. How can I help you today?`);
+        } else if (command.includes("exit") || command.includes("stop") || command.includes("quit")) {
+            speak("Goodbye.");
+            if (isVoiceMode && recognition) {
+                recognition.stop();
+                isVoiceMode = false;
+                modeBtn.textContent = 'Start Voice Mode';
+            }
+        } else if (command.includes("tell me a story") || command.includes("write a story") || command.includes("story")) {
+            tellStory();
+        } else if (command.includes("math") || command.includes("calculate") || command.includes("function")) {
+            handleMathQuery(command);
+        } else if (command.includes("english") || command.includes("grammar") || command.includes("noun") || command.includes("verb") || command.includes("adjective") || command.includes("adverb") || command.includes("tense") || command.includes("subject") || command.includes("object") || command.includes("punctuation") || command.includes("pronoun") || command.includes("conjunction")) {
+            handleEnglishModule(command);
+        } else if (command.includes("what can you do") || command.includes("help") || command.includes("list commands")) {
+            speak("I can say hello, tell stories, give math info, provide time/date/location, tell jokes/facts/quotes, define terms like HTML, CSS, Python, and answer general knowledge questions including detailed English grammar (nouns, verbs, adjectives, adverbs, tenses, etc.).");
+        } else {
+            // Loop through the knowledge base to find a matching keyword
+            let responseFound = false;
+            for (const key in knowledgeBase) {
+                if (command.includes(key)) {
+                    const response = knowledgeBase[key];
+                    if (typeof response === 'function') {
+                        response(); // Execute the function if it's dynamic
+                    } else {
+                        speak(response); // Speak the string response
+                    }
+                    responseFound = true;
+                    break; // Stop searching once a match is found
+                }
+            }
+
+            if (!responseFound && command) {
+                // General fallback response
+                speak(`I don't understand that command. Type 'what can you do' to see my functions.`);
+            }
+        }
+    }
+
+    // --- Event Handlers (Unchanged) ---
+    sendBtn.addEventListener('click', () => {
+        const command = userInput.value.trim().toLowerCase();
+        if (command) {
+            logMessage(`User (Text): ${command}`, 'user-msg');
+            processCommand(command);
+            userInput.value = '';
+        }
+    });
+
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendBtn.click();
+        }
+    });
+
+    if (modeBtn) {
+        modeBtn.addEventListener('click', () => {
+            if (isVoiceMode) {
+                recognition.stop();
+                modeBtn.textContent = 'Start Voice Mode';
+                isVoiceMode = false;
+                logMessage(`${aiName}: Voice mode stopped.`, 'ai-msg');
+            } else {
+                try {
+                    recognition.start();
+                    modeBtn.textContent = 'Stop Voice Mode';
+                    isVoiceMode = true;
+                    logMessage(`${aiName}: Listening for voice command...`, 'ai-msg');
+                } catch (error) {
+                    logMessage(`${aiName}: Microphone access failed or recognition is already active.`, 'error-msg');
+                }
+            }
+        });
+    }
+
 </script>
-
 </body>
 </html>
